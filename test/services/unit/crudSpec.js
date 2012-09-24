@@ -69,19 +69,6 @@ describe('CRUD scope mix-in', function () {
     });
 
     describe('remove', function () {
-
-      it('can remove only if $id is defined', function () {
-        item.$id = function () {
-          return undefined;
-        };
-        expect(scope.canRemove()).toBeFalsy();
-
-        item.$id = function () {
-          return 'id';
-        };
-        expect(scope.canRemove()).toBeTruthy();
-      });
-      
       it('should simply call success callback if $id not defined', function () {
         item.$id = function () {
           return undefined;
