@@ -54,7 +54,7 @@ module.exports = function (grunt) {
         dest: '<%= distdir %>/angular.js'
       },
       mongo: {
-        src:['lib/mongolab/*.js'],
+        src:['<config:concat.mongo.dest>'],
         dest: '<%= distdir %>/mongolab.js'
       }
     },
@@ -107,11 +107,10 @@ module.exports = function (grunt) {
       var args = [cmd, testConfigFile].concat(options);
       var done = grunt.task.current.async();
       var child = grunt.utils.spawn({cmd:testacularCmd, args:args}, function (err, result, code) {
-        if ( code ) {
-          done(false);
-        } else {
-          done();
+        if (code) {
+          grunt.fail.fatal("Test failed...");
         }
+        done();
   });
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
