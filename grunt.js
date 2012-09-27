@@ -1,8 +1,6 @@
 module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-recess');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadTasks('build');
 
   // Project configuration.
@@ -19,24 +17,18 @@ module.exports = function (grunt) {
     src: {
       js: ['src/**/*.js', 'dist/tmp/**/*.js'],
       html: ['src/index.html'],
-      tpl: ['src/app/**/*.tpl.html'],
-      less: ['src/less/stylesheet.less'] // recess:build doesn't accept ** in its file patterns
-    },
-    clean: ['<config:distdir>'],
-    copy: {
-      assets: {
-        files: {'<%= distdir %>/': 'assets/**'}
-      }
+      tpl: ['src/**/*.tpl.html'],
+      less: ['src/modules/*/less/*.less'] // recess:build doesn't accept ** in its file patterns
     },
     test: {
-      unit: ['test/unit/**/*.js']
+      js: ['test/unit/**/*.js']
     },
     lint:{
-      files:['grunt.js', '<config:src.js>', '<config:test.unit>']
+      files:['grunt.js', '<config:src.js>', '<config:test.js>']
     },
     html2js: {
       src: ['<config:src.tpl>'],
-      base: 'src/app',
+      base: 'src/modules',
       dest: 'dist/tmp'
     },
     concat:{
@@ -59,7 +51,7 @@ module.exports = function (grunt) {
         dest:'<%= distdir %>/<%= pkg.name %>.js'
       },
       angular: {
-        src:['<config:concat.angular.dest>'],
+        src:['<config:concat.angular.src>'],
         dest: '<%= distdir %>/angular.js'
       },
       mongo: {
@@ -105,9 +97,9 @@ module.exports = function (grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default', 'build lint test:unit');
-  grunt.registerTask('build', 'clean html2js concat recess:build index copy');
-  grunt.registerTask('release', 'clean html2js min lint test recess:min index copy');
+  grunt.registerTask('default', 'build lint test');
+  grunt.registerTask('build', 'html2js concat recess:build index');
+  grunt.registerTask('release', 'html2js min lint test recess:min index');
 
   // HTML stuff
   grunt.registerTask('index', 'Process index.html', function(){
