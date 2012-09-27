@@ -1,30 +1,29 @@
 angular.module('services.crud', []);
-angular.module('services.crud').factory('crudMethods', function () {
+angular.module('services.crud').factory('CRUDScopeMixIn', function () {
 
-  return function (itemName, item, formName, successcb, errorcb) {
+  var CRUDScopeMixIn = function (itemName, item, formName, successcb, errorcb) {
 
-    var mixin = {};
+    //a copy as an instance memeber here, just not to expose it to a template, might change in the future
+    var copy = angular.copy(item);
+    this[itemName] = item;
 
-    mixin[itemName] = item;
-    mixin[itemName+'Copy'] = angular.copy(item);
-
-    mixin.save = function () {
+    this.save = function () {
       this[itemName].$saveOrUpdate(successcb, successcb, errorcb, errorcb);
     };
 
-    mixin.canSave = function () {
-      return this[formName].$valid && !angular.equals(this[itemName], this[itemName+'Copy']);
+    this.canSave = function () {
+      return this[formName].$valid && !angular.equals(this[itemName], copy);
     };
 
-    mixin.revertChanges = function () {
-      this[itemName] = angular.copy(this[itemName+'Copy']);
+    this.revertChanges = function () {
+      this[itemName] = angular.copy(copy);
     };
 
-    mixin.canRevert = function () {
-      return !angular.equals(this[itemName], this[itemName+'Copy']);
+    this.canRevert = function () {
+      return !angular.equals(this[itemName], copy);
     };
 
-    mixin.remove = function () {
+    this.remove = function () {
       if (this[itemName].$id()) {
         this[itemName].$remove(successcb, errorcb);
       } else {
@@ -32,12 +31,11 @@ angular.module('services.crud').factory('crudMethods', function () {
       }
     };
 
-    mixin.canRemove = function() {
+    this.canRemove = function() {
       return item.$id();
     };
-
-    return mixin;
   };
+  return CRUDScopeMixIn;
 });
 
 angular.module('services.crud').provider('routeCRUD', function () {
@@ -54,7 +52,7 @@ angular.module('services.crud').provider('routeCRUD', function () {
 
   var routeDefFactory = function (resourceName, partialPrefix, resourceOperationType, dependencies, resolveFactoryFns) {
     return {
-      templateUrl:partialPrefix+'/partials/'+resourceName.toLowerCase()+'-'+resourceOperationType.toLowerCase()+'.tpl.html',
+      templateUrl:partialPrefix+'/'+resourceName.toLowerCase()+'-'+resourceOperationType.toLowerCase()+'.tpl.html',
       controller:resourceName+resourceOperationType +'Ctrl',
       resolve:routeResolveFactory(dependencies, resolveFactoryFns)
     };
