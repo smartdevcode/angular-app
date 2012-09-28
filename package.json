@@ -1,28 +1,15 @@
 {
-  "author": "Pawel Kozlowski & Peter Bacon Darwin",
-  "name": "angular-app",
-  "homepage": "https://github.com/angular-app/angular-app",
-  "version": "0.0.1-SNAPSHOT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:angular-app/angular-app.git"
+  "name": "angular-app-server",
+  "description": "Back end server to support our angular app",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "~3.0.0",
+    "passport": "~0.1.12",
+    "passport-local": "~0.1.6",
+    "restler": "~2.0.1"
   },
-  "bugs": {
-    "url": "https://github.com/angular-app/angular-app/issues"
-  },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://raw.github.com/angular-app/angular-app/master/LICENSE"
-    }
-  ],
-  "engines": {
-    "node": ">= 0.8.4"
-  },
-  "dependencies": {},
   "devDependencies": {
-    "grunt-recess": "~0.1.0",
-    "grunt-contrib-clean": "~0.3.0",
-    "grunt-contrib-copy": "~0.3.0"
+    "rewire": "~1.0.3"
   }
 }
