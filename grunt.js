@@ -1,44 +1,139 @@
-/*global module:false*/
-module.exports = function(grunt) {
+module.exports = function (grunt) {
+
+  grunt.loadNpmTasks('grunt-recess');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadTasks('build');
 
   // Project configuration.
   grunt.initConfig({
-    lint: {
-      files: ['grunt.js', 'server.js', 'lib/*.js', 'test/**/*.js']
+    distdir: 'dist',
+    pkg:'<json:package.json>',
+    meta:{
+      banner:'/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
+        '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+        '<%= pkg.homepage ? "* " + pkg.homepage + "\n" : "" %>' +
+        '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>;\n' +
+        ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */'
+    },
+    src: {
+      js: ['src/**/*.js', 'dist/tmp/**/*.js'],
+      html: ['src/index.html'],
+      tpl: ['src/app/**/*.tpl.html'],
+      less: ['src/less/stylesheet.less'] // recess:build doesn't accept ** in its file patterns
+    },
+    clean: ['<%= distdir %>/*'],
+    copy: {
+      assets: {
+        files: {'<%= distdir %>/': 'src/assets/**'}
+      }
     },
     test: {
-      files: ['test/**/*.js']
+      unit: ['test/unit/**/*Spec.js'],
+      e2e: ['test/e2e/**/*Spec.js']
     },
-    watch: {
-      files: '<config:lint.files>',
-      tasks: 'default timestamp'
+    lint:{
+      files:['grunt.js', '<config:src.js>', '<config:test.unit>', '<config:test.e2e>']
     },
-    jshint: {
-      options: {
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        boss: true,
-        eqnull: true
+    html2js: {
+      src: ['<config:src.tpl>'],
+      base: 'src/app',
+      dest: 'dist/tmp'
+    },
+    concat:{
+      dist:{
+        src:['<banner:meta.banner>', '<config:src.js>'],
+        dest:'<%= distdir %>/<%= pkg.name %>.js'
       },
-      globals: { require: false, __dirname: false, console: false, module: false, exports: false }
-    }
+      angular: {
+        src:['lib/angular/angular.js'],
+        dest: '<%= distdir %>/angular.js'
+      },
+      mongo: {
+        src:['lib/mongolab/*.js'],
+        dest: '<%= distdir %>/mongolab.js'
+      },
+      bootstrap: {
+        src:['lib/bootstrap/*.js'],
+        dest: '<%= distdir %>/bootstrap.js'
+      },
+      jquery: {
+        src:['lib/jquery/*.js'],
+        dest: '<%= distdir %>/jquery.js'        
+      }
+    },
+    min: {
+      dist:{
+        src:['<banner:meta.banner>', '<config:src.js>'],
+        dest:'<%= distdir %>/<%= pkg.name %>.js'
+      },
+      angular: {
+        src:['<config:concat.angular.src>'],
+        dest: '<%= distdir %>/angular.js'
+      },
+      mongo: {
+        src:['lib/mongolab/*.js'],
+        dest: '<%= distdir %>/mongolab.js'
+      },
+      bootstrap: {
+        src:['lib/bootstrap/*.js'],
+        dest: '<%= distdir %>/bootstrap.js'
+      },
+      jquery: {
+        src:['lib/jquery/*.js'],
+        dest: '<%= distdir %>/jquery.js'        
+      }
+    },
+    recess: {
+      build: {
+        src: ['<config:src.less>'],
+        dest: '<%= distdir %>/<%= pkg.name %>.css',
+        options: {
+          compile: true
+        }
+      },
+      min: {
+        src: ['<config:src.less>'],
+        dest: '<config:recess.build.dest>',
+        options: {
+          compress: true
+        }
+      }
+    },
+    watch:{
+      files:['<config:src.js>', '<config:test.unit>', '<config:src.less>', '<config:src.tpl>', '<config:src.html>'],
+      tasks:'default timestamp'
+    },
+    jshint:{
+      options:{
+        curly:true,
+        eqeqeq:true,
+        immed:true,
+        latedef:true,
+        newcap:true,
+        noarg:true,
+        sub:true,
+        boss:true,
+        eqnull:true
+      },
+      globals:{}
+    },
+    uglify:{}
   });
 
   // Default task.
-  grunt.registerTask('default', 'lint test');
+  grunt.registerTask('default', 'build lint test:unit');
+  grunt.registerTask('build', 'clean html2js concat recess:build index copy');
+  grunt.registerTask('release', 'clean html2js min lint test recess:min index copy e2e');
 
+  // HTML stuff
+  grunt.registerTask('index', 'Process index.html', function(){
+     grunt.file.copy('src/index.html', 'dist/index.html', {process:grunt.template.process});
+  });
+
+  // Print a timestamp (useful for when watching)
   grunt.registerTask('timestamp', function() {
     grunt.log.subhead(Date());
   });
 
-  grunt.registerTask('supervise', function() {
-    this.async();
-    require('supervisor').run(['server.js']);
-  });
 };
