@@ -1,5 +1,6 @@
 angular.module('services.notifications', []).factory('notifications', function ($rootScope) {
 
+
   // A factory to create a notification list object that manages its own notifications
   var createNotificationList = function() {
     var list = [];
@@ -83,8 +84,8 @@ angular.module('services.notifications', []).factory('notifications', function (
     },
 
     // Push a notification to the specified list
-    pushNotification: function(listName, message, type, options) {
-      var list = notificationLists[listName];
+    pushNotification: function(list, message, type, options) {
+      list = notificationLists[list];
       if ( angular.isDefined(list) ) {
         var notification = list.createNotification(message, type, options);
         list.push(notification);
@@ -102,27 +103,18 @@ angular.module('services.notifications', []).factory('notifications', function (
   function pushFunctionName(listName) {
     return 'push'+listName;
   }
-  function accessFunctionName(listName) {
-    return listName.substr(0,1).toLowerCase() + listName.substr(1);
-  }
 
   // Add and configure a new list in the notification service.
   function addNotificationListToService(name) {
     notificationLists[name] = createNotificationList(name);
     notificationsService[pushFunctionName(name)] = function(message, type, options) { return notificationsService.pushNotification(name, message, type, options); };
-    notificationsService[accessFunctionName(name)] = function() { return notificationLists[name]; };
-  }
-
-  function deleteNotificationList(name) {
-    delete notificationsService[pushFunctionName(name)];
-    delete notificationLists[name];
-    delete notificationsService[accessFunctionName(name)];
   }
 
   function moveNotificationList(oldListName, newListName) {
     notificationsService[pushFunctionName(newListName)] = notificationsService[pushFunctionName(oldListName)];
     notificationLists[newListName] = notificationLists[oldListName];
-    deleteNotificationList(oldListName);
+    delete notificationsService['push'+oldListName+'Notification'];
+    delete notificationLists[oldListName];
   }
 
   addNotificationListToService('Sticky');
