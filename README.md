@@ -19,7 +19,7 @@ We've learned a lot while using and supporting AngularJS on the [mailing list](h
 * Persistence store: [MongoDB](http://www.mongodb.org/) hosted on [MongoLab](https://mongolab.com/)
 * Backend: [Node.js](http://nodejs.org/)
 * Awesome [AngularJS](http://www.angularjs.org/) on the client
-* CSS based on [Twitter's bootstrap](http://twitter.github.com/bootstrap/)
+* CSS based on [Twitter's bootstrap](http://getbootstrap.com/)
 
 ### Build
 
@@ -114,7 +114,7 @@ The client specifies the name of the MongoDB to use in `client/src/app/app.js`. 
 
 ```
 angular.module('app').constant('MONGOLAB_CONFIG', {
-  baseUrl: 'http://localhost:3000/databases/',
+  baseUrl: '/databases/',
   dbName: 'ascrum'
 });
 ```
